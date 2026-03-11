@@ -1,28 +1,71 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../api/auth.api";
 
 function Login() {
+
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+
+      const res = await loginUser(formData);
+
+      const token = res.data.data.accessToken;
+
+      localStorage.setItem("token", token);
+
+      navigate("/dashboard");
+
+    } catch (error) {
+
+      console.error(error.response?.data?.message);
+
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-
       <div className="bg-white shadow-lg rounded-xl w-full max-w-md p-6 sm:p-8">
 
         <h2 className="text-2xl font-bold text-center mb-6">
           Login
         </h2>
 
-        <form className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
           <input
             type="email"
+            name="email"
             placeholder="Email"
-            className="border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="border rounded-lg px-4 py-2 w-full"
           />
 
           <input
             type="password"
+            name="password"
             placeholder="Password"
-            className="border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoComplete="current-password"
+            value={formData.password}
+            onChange={handleChange}
+            className="border rounded-lg px-4 py-2 w-full"
           />
 
           <button
@@ -36,16 +79,12 @@ function Login() {
 
         <p className="text-center text-sm mt-4">
           Don't have an account?
-          <Link
-            to="/register"
-            className="text-blue-600 ml-1 hover:underline"
-          >
+          <Link to="/register" className="text-blue-600 ml-1 hover:underline">
             Register
           </Link>
         </p>
 
       </div>
-
     </div>
   );
 }
